@@ -317,6 +317,7 @@ var SectionMain = class SectionMain extends ME.imports.sections.section_base.Sec
             this.button_start.grab_key_focus();
 
         this.cache.laps = [];
+        this.cache.laps_raw = [];
         this.cache.time = 0;
         this._destroy_laps();
 
@@ -368,13 +369,46 @@ var SectionMain = class SectionMain extends ME.imports.sections.section_base.Sec
         let m   = Math.floor(t / 60);
         let s   = t % 60;
 
+        let time;
         switch (this.clock_format) {
-          case ClockFormat.H_M:
-            return "%02d:%02d".format(h, m);
-          case ClockFormat.H_M_S:
-            return "%02d:%02d:%02d".format(h, m, s);
-          case ClockFormat.H_M_S_CS:
-            return "%02d:%02d:%02d.%02d".format(h, m, s, cs);
+        case ClockFormat.H_M:
+            time = "%02d:%02d".format(h, m);
+            break;
+        case ClockFormat.H_M_S:
+            time = "%02d:%02d:%02d".format(h, m, s);
+            break;
+        case ClockFormat.H_M_S_CS:
+            time = "%02d:%02d:%02d.%02d".format(h, m, s, cs);
+            break;
+        }
+
+        if (this.cache.laps_raw.length > 0) {
+            let lap_time;
+
+            let lap_ms  = this.cache.time - this.cache.laps_raw[this.cache.laps_raw.length-1]; // microseconds
+            let lap_t   = Math.floor(lap_ms / 10000); // centiseconds
+
+            let lap_cs  = lap_t % 100;
+            lap_t       = Math.floor(lap_t / 100);
+            let lap_h   = Math.floor(lap_t / 3600);
+            lap_t       = lap_t % 3600;
+            let lap_m   = Math.floor(lap_t / 60);
+            let lap_s   = lap_t % 60;
+
+            switch (this.clock_format) {
+            case ClockFormat.H_M:
+                lap_time = "%02d:%02d".format(lap_h, lap_m);
+                break;
+            case ClockFormat.H_M_S:
+                lap_time = "%02d:%02d:%02d".format(lap_h, lap_m, lap_s);
+                break;
+            case ClockFormat.H_M_S_CS:
+                lap_time = "%02d:%02d:%02d.%02d".format(lap_h, lap_m, lap_s, lap_cs);
+                break;
+            }
+            return time + " (" + lap_time + ")";
+        } else {
+            return time;
         }
     }
 
@@ -389,6 +423,7 @@ var SectionMain = class SectionMain extends ME.imports.sections.section_base.Sec
         if (this.stopwatch_state !== StopwatchState.RUNNING) return;
 
         this.cache.laps.push(this._time_format_str());
+        this.cache.laps_raw.push(this.cache.time);
         this._store_cache();
         this._update_laps();
     }
