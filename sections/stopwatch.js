@@ -164,10 +164,12 @@ var SectionMain = class SectionMain extends ME.imports.sections.section_base.Sec
         this.button_lap   = new St.Button({ can_focus: true, label: _('Lap'),   style_class: 'btn-lap button',   x_expand: true, visible: false });
         this.button_start = new St.Button({ can_focus: true, label: _('Start'), style_class: 'btn-start button', x_expand: true });
         this.button_stop  = new St.Button({ can_focus: true, label: _('Stop'), style_class: 'btn-stop button',  x_expand: true, visible: false });
+        this.button_add   = new St.Button({ can_focus: true, label: _('+10min'),   style_class: 'btn-add button',   x_expand: true, visible: false });
         this.stopwatch_button_box.add_child(this.button_reset);
         this.stopwatch_button_box.add_child(this.button_lap);
         this.stopwatch_button_box.add_child(this.button_start);
         this.stopwatch_button_box.add_child(this.button_stop);
+        this.stopwatch_button_box.add_child(this.button_add);
 
         //
         // laps box
@@ -212,6 +214,7 @@ var SectionMain = class SectionMain extends ME.imports.sections.section_base.Sec
         this.sigm.connect_release(this.button_reset, Clutter.BUTTON_PRIMARY, true, () => this.reset());
         this.sigm.connect_release(this.button_stop, Clutter.BUTTON_PRIMARY, true, () => this.stop());
         this.sigm.connect_release(this.button_lap, Clutter.BUTTON_PRIMARY, true, () => this.lap());
+        this.sigm.connect_release(this.button_add, Clutter.BUTTON_PRIMARY, true, () => this.add());
 
         //
         // finally
@@ -330,6 +333,10 @@ var SectionMain = class SectionMain extends ME.imports.sections.section_base.Sec
             this.panel_item.set_mode('icon');
 
         this._store_cache();
+    }
+
+    add () {
+        this.start_time = this.start_time - (60000000 * 10); // subtract 10 minutes in microseconds
     }
 
     stopwatch_toggle () {
@@ -459,6 +466,7 @@ var SectionMain = class SectionMain extends ME.imports.sections.section_base.Sec
           case StopwatchState.RESET:
             this.button_reset.hide();
             this.button_lap.hide();
+            this.button_add.hide();
             this.button_start.show();
             this.button_stop.hide();
             this.button_start.add_style_pseudo_class('first-child');
@@ -475,6 +483,7 @@ var SectionMain = class SectionMain extends ME.imports.sections.section_base.Sec
             this.button_lap.show();
             this.button_start.hide();
             this.button_stop.show();
+            this.button_add.show();
             this.fullscreen.button_reset.show();
             this.fullscreen.button_lap.show();
             this.fullscreen.button_start.hide();
@@ -483,6 +492,7 @@ var SectionMain = class SectionMain extends ME.imports.sections.section_base.Sec
           case StopwatchState.STOPPED:
             this.button_reset.show();
             this.button_lap.hide();
+            this.button_add.hide();
             this.button_start.show();
             this.button_stop.hide();
             this.button_start.remove_style_pseudo_class('first-child');
